@@ -1,0 +1,50 @@
+# setup
+cd /home/AOS/a4/ROLLNO_Assignment4 && make
+mkdir -p ~/mygit_test && cd ~/mygit_test
+alias mygit=/home/AOS/a4/ROLLNO_Assignment4/mygit
+
+mygit init
+ls -a .mygit            # objects/, HEAD, index
+mygit init              # should say "Reinitialized", not wipe anything
+
+# hash-object
+echo -n "hello world" > test.txt
+mygit hash-object test.txt        # 95d09f2b10159347eece71399a7e2e907ea3df4f
+git hash-object test.txt          # must match
+mygit hash-object -w test.txt
+ls .mygit/objects/95/             # object file now exists
+
+#cat-file
+mygit cat-file -p 95d09f2b10159347eece71399a7e2e907ea3df4f   # hello world
+mygit cat-file -s 95d09f2b10159347eece71399a7e2e907ea3df4f   # 11
+mygit cat-file -t 95d09f2b10159347eece71399a7e2e907ea3df4f   # blob
+
+#write-tree / ls-tree
+mkdir -p sub1 sub2
+echo "AOS TA's are the best" > file1.txt
+echo "PG1 is GOAT" > sub1/file2.txt
+echo "Building VCS is fun" > sub2/file3.txt
+T=$(mygit write-tree); echo $T
+mygit ls-tree $T                  # mode type sha name
+mygit ls-tree --name-only $T
+mygit cat-file -t $T              # tree
+
+## you can check the result with actual git. Copy the directory and run `git init -q && git add -A && git write-tree`.
+## git will pickup .mygit and visa verse so delete it.
+
+#add / commit / log
+mygit add .
+mygit commit -m "first"           # prints a SHA
+echo more >> file1.txt
+mygit add file1.txt sub1/file2.txt
+mygit commit -m "second"
+mygit commit                      # nothing changed, so it refuses
+mygit log                         # newest first, with the parent SHA
+cat .mygit/HEAD                   # latest commit SHA
+
+# checkout
+mygit checkout <first_commit_sha>
+cat file1.txt                     # old content, no "more" line
+mygit checkout <second_commit_sha>   # restores the new content
+
+
